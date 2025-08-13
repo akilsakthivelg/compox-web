@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Verify Email</title>
+  <script>
+    async function handleVerification() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      const type = params.get('type');
+
+      if (!token || !type) {
+        document.body.innerHTML = "<h3>Invalid link</h3>";
+        return;
+      }
+
+      try {
+        // Call Supabase to verify the link
+        const res = await fetch(`https://YOUR-SUPABASE-PROJECT.supabase.co/auth/v1/verify?type=${type}&token=${token}`, {
+          method: 'GET',
+          headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhzb2FucnJkeWJpbWVtYWNhcm9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYzNDg0OTQsImV4cCI6MjA2MTkyNDQ5NH0.GbdguCKb_UdXbtG4cAYqOCZV-ejjdL7YdRE7NHrb0vM' }
+        });
+
+        if (res.ok) {
+          document.body.innerHTML = "<h3>Email verified ✅<br>Opening app...</h3>";
+          // Try deep link
+          setTimeout(() => {
+            window.location.href = `compox://login-callback?token=${token}&type=${type}`;
+          }, 1500);
+        } else {
+          document.body.innerHTML = "<h3>Link expired ❌</h3>";
+        }
+      } catch (err) {
+        document.body.innerHTML = "<h3>Error verifying</h3>";
+      }
+    }
+    handleVerification();
+  </script>
+</head>
+<body>
+  <h3>Verifying...</h3>
+</body>
+</html>
