@@ -1,30 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Verify Email</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding-top: 40px; }
+    h3 { color: #333; }
+  </style>
   <script>
-    async function handleVerification() {
+    function openDeepLink(url) {
+      // Try to open the app via deep link
+      const now = Date.now();
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      iframe.src = url;
+      document.body.appendChild(iframe);
+
+      // Fallback check: If still on this page after ~1.5s, app likely not installed
+      setTimeout(() => {
+        const elapsed = Date.now() - now;
+        if (elapsed < 1500) {
+          // App not installed — just stay here
+          document.body.innerHTML += "<p>App not detected. Please open it manually.</p>";
+        }
+      }, 1000);
+    }
+
+    function handleVerification() {
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = hashParams.get('access_token');
       const refreshToken = hashParams.get('refresh_token');
       const type = hashParams.get('type');
 
-      if (!accessToken || !refreshToken) {
-        document.body.innerHTML = "<h3>Invalid or expired link ❌</h3>";
+      if (!accessToken || !refreshToken || type !== 'signup') {
+        document.body.innerHTML = "<h3>Invalid or expired verification link.</h3>";
         return;
       }
 
-      document.body.innerHTML = "<h3>Email verified ✅<br>Opening app...</h3>";
+      // Show success
+      document.body.innerHTML = "<h3>Email verified ✅</h3><p>Opening app...</p>";
 
-      // Deep link into your app
-      setTimeout(() => {
-        window.location.href = 
-          `compox://login-callback?access_token=${encodeURIComponent(accessToken)}&refresh_token=${encodeURIComponent(refreshToken)}&type=${encodeURIComponent(type || '')}`;
-      }, 1500);
+      // Attempt to open deep link (will only work if app is installed)
+      const deepLink = `compox://login-callback?access_token=${encodeURIComponent(accessToken)}&refresh_token=${encodeURIComponent(refreshToken)}`;
+      openDeepLink(deepLink);
     }
 
-    handleVerification();
+    window.onload = handleVerification;
   </script>
 </head>
 <body>
