@@ -5,35 +5,25 @@
   <title>Verify Email</title>
   <script>
     async function handleVerification() {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get('token');
-      const type = params.get('type');
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      const type = hashParams.get('type');
 
-      if (!token || !type) {
-        document.body.innerHTML = "<h3>Invalid link</h3>";
+      if (!accessToken || !refreshToken) {
+        document.body.innerHTML = "<h3>Invalid or expired link ❌</h3>";
         return;
       }
 
-      try {
-        // Call Supabase to verify the link
-        const res = await fetch(`https://YOUR-SUPABASE-PROJECT.supabase.co/auth/v1/verify?type=${type}&token=${token}`, {
-          method: 'GET',
-          headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhzb2FucnJkeWJpbWVtYWNhcm9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYzNDg0OTQsImV4cCI6MjA2MTkyNDQ5NH0.GbdguCKb_UdXbtG4cAYqOCZV-ejjdL7YdRE7NHrb0vM' }
-        });
+      document.body.innerHTML = "<h3>Email verified ✅<br>Opening app...</h3>";
 
-        if (res.ok) {
-          document.body.innerHTML = "<h3>Email verified ✅<br>Opening app...</h3>";
-          // Try deep link
-          setTimeout(() => {
-            window.location.href = `compox://login-callback?token=${token}&type=${type}`;
-          }, 1500);
-        } else {
-          document.body.innerHTML = "<h3>Link expired ❌</h3>";
-        }
-      } catch (err) {
-        document.body.innerHTML = "<h3>Error verifying</h3>";
-      }
+      // Deep link into your app
+      setTimeout(() => {
+        window.location.href = 
+          `compox://login-callback?access_token=${encodeURIComponent(accessToken)}&refresh_token=${encodeURIComponent(refreshToken)}&type=${encodeURIComponent(type || '')}`;
+      }, 1500);
     }
+
     handleVerification();
   </script>
 </head>
